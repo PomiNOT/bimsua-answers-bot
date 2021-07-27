@@ -47,7 +47,7 @@ export default {
         expires: new Date(Date.now() + 7 * 24 * 3600 * 1000)
       });
     }).then(imageURL => {
-      axios.post(
+      axios.patch(
         `https://discord.com/api/v8/webhooks/${process.env.D_APPID}/${interactionToken}/messages/@original`,
         {
           embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0]).toJSON()]

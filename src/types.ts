@@ -1,4 +1,5 @@
 import {
+  ApplicationCommandOption,
   ApplicationCommandOptionValue,
   InteractionApplicationCommandCallbackData
 } from 'slash-commands';
@@ -17,7 +18,19 @@ export interface InteractionFunction {
 export interface InteractionHandler {
   name: string,
   description: string,
-  args: string[],
-  argsDesc: string[],
+  args: ApplicationCommandOption[],
   callback: InteractionFunction
+}
+
+export type Choice = 'A' | 'B' | 'C' | 'D';
+
+export interface Sheet {
+  [key: number]: Choice
+}
+
+export interface AnswerSheet {
+  name: string,
+  nQuestion: number,
+  rightSheet: Sheet,
+  sheet: Sheet
 }

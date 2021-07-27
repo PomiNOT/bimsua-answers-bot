@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/storage';
 
 let config: any = {
   apiKey: process.env.API_KEY,
@@ -12,4 +13,4 @@ let config: any = {
 };
 
 firebase.initializeApp(config);
-export default firebase.firestore();
+export default firebase;

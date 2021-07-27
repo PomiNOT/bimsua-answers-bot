@@ -1,51 +1,55 @@
-import firestore from '../firestore';
+import { CommandOptions, InteractionHandler, AnswerSheet } from '../types';
+import { InteractionApplicationCommandCallbackData, ApplicationCommandOptionType } from 'slash-commands';
 import { MessageEmbed } from 'discord.js';
+import firebase from '../firebase';
+import admin from '../firebaseAdmin';
+import { drawSheet } from '../draw';
 
-type Choice = 'A' | 'B' | 'C' | 'D';
-
-interface Sheet {
-  [key: number]: Choice
-}
-
-interface AnswerSheet {
-  name: string,
-  nQuestion: number,
-  rightSheet: Sheet,
-  sheet: Sheet
-}
+const firestore = firebase.firestore();
 
 export default {
-  slash: true,
-  testOnly: false,
-  category: 'Sheets',
-  description: 'Download and display a answer sheet',
-  syntaxError: 'Wrong syntax! use /sheet {ARGUMENTS}',
-  minArgs: 1,
-  expectedArgs: '<id>',
-  async callback({ args }: { args: string[] }): Promise<string | MessageEmbed> {
-    const [ID] = args;
+  name: 'opensheet',
+  description: 'Load a sheet from bimsua Answers',
+  args: [
+    {
+      type: ApplicationCommandOptionType.STRING,
+      name: 'id',
+      description: 'ID of the sheet you want to open',
+      required: true
+    }
+  ],
+  async callback(options: CommandOptions): Promise<InteractionApplicationCommandCallbackData> {
+    const ID = options.id;
     const metaDoc = await firestore.doc(`/sheet_refs/${ID}`).get();
     if (!metaDoc.exists) {
-      return `No record found for ID ${ID}`;
+      return {
+        content: `No record found for ID ${ID}`
+      };
     }
-    if (!metaDoc.data()) return 'Read path error';
+    if (!metaDoc.data()) return { content: `No record found for ID ${ID}` };
 
     const sheet = await firestore.doc(metaDoc.data()!.path).get();
-    if (!sheet.data()) return 'Read data error';
+    if (!sheet.data()) return { content: 'Read data error' };
 
-    return makeEmbed(sheet.data() as AnswerSheet);
+    const bucket = admin.storage().bucket();
+    const uploadStream = bucket.file(`${ID}.png`).createWriteStream();
+
+    drawSheet(sheet.data() as AnswerSheet).pipe(uploadStream);
+
+    const imageURL = await bucket.file(`${ID}.png`).getSignedUrl({
+      action: 'read',
+      expires: new Date(Date.now() + 7 * 24 * 3600 * 1000)
+    });
+
+    return {
+      embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0]).toJSON()]
+    };
   }
-}
+} as InteractionHandler;
 
-
-function makeEmbed(sheetData: AnswerSheet): MessageEmbed {
-  const sheetFields =
-    Object
-      .entries(sheetData.sheet)
-      .map(([k, v]) => ({ name: k, value: v, inline: true }));
-
+function makeEmbed(sheetData: AnswerSheet, imageURL: string): MessageEmbed {
   return new MessageEmbed()
             .setTitle(sheetData.name)
             .setDescription(`${sheetData.nQuestion} questions`)
-            .addFields(sheetFields);
+            .setImage(imageURL);
 };

@@ -1,14 +1,15 @@
 import {
-  Interaction, InteractionResponseType, InteractionResponse
+  Interaction, InteractionResponseType, InteractionResponse,
+  ApplicationCommandOption
 } from 'slash-commands';
 
 import { Request, Response } from 'express';
 import './types';
 import { CommandOptions, InteractionHandler } from './types';
 
-function checkValidUsage(requiredArgs: string[], passedArgs: CommandOptions) {
-  for (const arg in requiredArgs) {
-    if (!(arg in passedArgs!)) return false;
+function checkValidUsage(requiredArgs: ApplicationCommandOption[], passedArgs: CommandOptions) {
+  for (const arg of requiredArgs) {
+    if (arg.required && !(arg.name in passedArgs!)) return false;
   }
 
   return true;

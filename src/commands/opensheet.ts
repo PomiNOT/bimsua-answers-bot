@@ -4,8 +4,11 @@ import { MessageEmbed } from 'discord.js';
 import firebase from '../firebase';
 import admin from '../firebaseAdmin';
 import { drawSheet } from '../draw';
+import { promisify } from 'util';
+import stream from 'stream';
 
 const firestore = firebase.firestore();
+const pipeline = promisify(stream.pipeline);
 
 export default {
   name: 'opensheet',
@@ -34,7 +37,10 @@ export default {
     const bucket = admin.storage().bucket();
     const uploadStream = bucket.file(`${ID}.png`).createWriteStream();
 
-    drawSheet(sheet.data() as AnswerSheet).pipe(uploadStream);
+    await pipeline(
+      drawSheet(sheet.data() as AnswerSheet),
+      uploadStream
+    );
 
     const imageURL = await bucket.file(`${ID}.png`).getSignedUrl({
       action: 'read',

@@ -4,8 +4,8 @@
   "description": "simple bot for fetching bimsua Answers",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "run-build": "tsc",
+    "start": "node dist/index.js",
+    "build": "tsc",
     "dev": "tsnd --respawn src/index.ts"
   },
   "keywords": [],

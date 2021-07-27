@@ -50,7 +50,7 @@ export default {
       axios.post(
         `https://discord.com/api/v8/webhooks/${process.env.D_APPID}/${interactionToken}/messages/@original`,
         {
-          embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0])]
+          embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0]).toJSON()]
         }
       );
     });

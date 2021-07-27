@@ -56,7 +56,7 @@ export default {
       } as InteractionResponse);
     }
 
-    const answer = await Promise.resolve(handler.callback(opts));
+    const answer = await Promise.resolve(handler.callback(opts, interaction.token));
 
     return res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

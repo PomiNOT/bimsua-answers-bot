@@ -6,6 +6,7 @@ import admin from '../firebaseAdmin';
 import { drawSheet } from '../draw';
 import { promisify } from 'util';
 import stream from 'stream';
+import axios from 'axios';
 
 const firestore = firebase.firestore();
 const pipeline = promisify(stream.pipeline);
@@ -21,7 +22,7 @@ export default {
       required: true
     }
   ],
-  async callback(options: CommandOptions): Promise<InteractionApplicationCommandCallbackData> {
+  async callback(options: CommandOptions, interactionToken: string): Promise<InteractionApplicationCommandCallbackData> {
     const ID = options.id;
     const metaDoc = await firestore.doc(`/sheet_refs/${ID}`).get();
     if (!metaDoc.exists) {
@@ -37,18 +38,25 @@ export default {
     const bucket = admin.storage().bucket();
     const uploadStream = bucket.file(`${ID}.png`).createWriteStream();
 
-    await pipeline(
+    pipeline(
       drawSheet(sheet.data() as AnswerSheet),
       uploadStream
-    );
-
-    const imageURL = await bucket.file(`${ID}.png`).getSignedUrl({
-      action: 'read',
-      expires: new Date(Date.now() + 7 * 24 * 3600 * 1000)
+    ).then(() => {
+      return bucket.file(`${ID}.png`).getSignedUrl({
+        action: 'read',
+        expires: new Date(Date.now() + 7 * 24 * 3600 * 1000)
+      });
+    }).then(imageURL => {
+      axios.post(
+        `https://discord.com/api/v8/webhooks/${process.env.D_APPID}/${interactionToken}/messages/@original`,
+        {
+          embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0])]
+        }
+      );
     });
 
     return {
-      embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0]).toJSON()]
+      embeds: [makeEmbed(sheet.data() as AnswerSheet, '').toJSON()]
     };
   }
 } as InteractionHandler;

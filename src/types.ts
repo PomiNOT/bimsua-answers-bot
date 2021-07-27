@@ -12,7 +12,7 @@ export type InteractionFunctionReturnValue =
   InteractionApplicationCommandCallbackData | Promise<InteractionApplicationCommandCallbackData>;
 
 export interface InteractionFunction {
-  (options: CommandOptions): InteractionFunctionReturnValue
+  (options: CommandOptions, interactionToken: string): InteractionFunctionReturnValue
 }
 
 export interface InteractionHandler {

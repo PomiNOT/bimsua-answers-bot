@@ -17,10 +17,10 @@ function checkValidUsage(requiredArgs: ApplicationCommandOption[], passedArgs: C
 
 export default {
   register(handler: InteractionHandler) {
-    this.handlers[handler.name] = handler;
+    this.handlers.set(handler.name, handler);
   },
 
-  handlers: {} as { [key: string]: InteractionHandler },
+  handlers: new Map<string, InteractionHandler>(),
 
   async handle(interaction: Interaction, req: Request, res: Response) {
     if (!interaction.data) {
@@ -31,12 +31,12 @@ export default {
     const commandName = interaction.data!.name;
     const options = interaction.data!.options;
 
-    const handler = this.handlers[commandName];
-
-    if (!handler) {
+    if (!this.handlers.has(commandName)) {
       console.error('Command not found, exiting...');
       return res.status(404).end('command not found');
     }
+
+    const handler = this.handlers.get(commandName)!;
 
     const opts = {} as CommandOptions;
 
@@ -56,7 +56,11 @@ export default {
       } as InteractionResponse);
     }
 
-    const answer = await Promise.resolve(handler.callback(opts, interaction.token));
+    const answer = await Promise.resolve(handler.callback({
+      options: opts,
+      sender: interaction.member.user.id,
+      interactionToken: interaction.token
+    }));
 
     return res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

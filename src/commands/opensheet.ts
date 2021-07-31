@@ -22,7 +22,7 @@ export default {
       required: true
     }
   ],
-  async callback(options: CommandOptions, interactionToken: string): Promise<InteractionApplicationCommandCallbackData> {
+  async callback({ options, interactionToken }): Promise<InteractionApplicationCommandCallbackData> {
     const ID = options.id;
     const metaDoc = await firestore.doc(`/sheet_refs/${ID}`).get();
     if (!metaDoc.exists) {

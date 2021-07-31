@@ -11,8 +11,14 @@ export interface CommandOptions {
 export type InteractionFunctionReturnValue =
   InteractionApplicationCommandCallbackData | Promise<InteractionApplicationCommandCallbackData>;
 
+export interface InteractionData {
+  options: CommandOptions,
+  interactionToken: string,
+  sender: string
+}
+
 export interface InteractionFunction {
-  (options: CommandOptions, interactionToken: string): InteractionFunctionReturnValue
+  (interactionData: InteractionData): InteractionFunctionReturnValue
 }
 
 export interface InteractionHandler {
@@ -33,4 +39,9 @@ export interface AnswerSheet {
   nQuestion: number,
   rightSheet: Sheet,
   sheet: Sheet
+}
+
+export enum SubscriptionErrorType {
+  NO_SUCH_GROUP = 'There is no group matches request',
+  USER_NOT_IN_GROUP = 'This user is not in the group'
 }

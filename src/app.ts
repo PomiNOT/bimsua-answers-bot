@@ -51,7 +51,7 @@ app.post('/interactions', verifySig, (req: Request, res: Response) => {
 app.get('/setup/:guildid', async (req: Request, res: Response) => {
   if (!req.params.guildid) return res.send('No guild id specified');
   
-  for (const handler of Object.values(commandHandler.handlers)) {
+  for (const handler of commandHandler.handlers.values()) {
     console.log(`Registering command ${handler.name}`);
 
     await client.createApplicationCommand({

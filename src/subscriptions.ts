@@ -76,6 +76,7 @@ export default class Subscriptions {
     const previous = this.previousSheets.get(sheetId)!;
 
     const changes = Object.keys(data.sheet).filter(k => previous[k] !== data.sheet[k]);
+    this.previousSheets.set(sheetId, data.sheet);
 
     for (const user of this.getUsersOfGroup(sheetId)) {
       this.sendDM(user, `These questions have changed in **${data.name}**: ${changes.map(q => `${q}. ${data.sheet[q]}`).join(', ')}`);

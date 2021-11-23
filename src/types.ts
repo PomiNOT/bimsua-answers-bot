@@ -4,6 +4,8 @@ import {
   InteractionApplicationCommandCallbackData
 } from 'slash-commands';
 
+import { Interaction } from 'slash-commands';
+
 export interface CommandOptions {
   [key: string]: ApplicationCommandOptionValue
 }
@@ -14,7 +16,8 @@ export type InteractionFunctionReturnValue =
 export interface InteractionData {
   options: CommandOptions,
   interactionToken: string,
-  sender: string
+  sender: string,
+  channelId: string
 }
 
 export interface InteractionFunction {

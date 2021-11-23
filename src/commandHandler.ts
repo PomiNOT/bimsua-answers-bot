@@ -1,5 +1,5 @@
 import {
-  Interaction, InteractionResponseType, InteractionResponse,
+  ApplicationCommandInteraction, InteractionResponseType, InteractionResponse,
   ApplicationCommandOption
 } from 'slash-commands';
 
@@ -15,6 +15,8 @@ function checkValidUsage(requiredArgs: ApplicationCommandOption[], passedArgs: C
   return true;
 }
 
+
+
 export default {
   register(handler: InteractionHandler) {
     this.handlers.set(handler.name, handler);
@@ -22,7 +24,7 @@ export default {
 
   handlers: new Map<string, InteractionHandler>(),
 
-  async handle(interaction: Interaction, req: Request, res: Response) {
+  async handle(interaction: ApplicationCommandInteraction, req: Request, res: Response) {
     if (!interaction.data) {
       console.error('No interaction data, exiting...');
       return res.status(401).end('no interaction data');
@@ -45,21 +47,22 @@ export default {
         if ('options' in o) continue;
         opts[o.name] = o.value;
       }
-    }
 
-    if (!checkValidUsage(handler.args, opts)) {
-      return res.json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: 'Invalid command usage'
-        }
-      } as InteractionResponse);
+      if (!checkValidUsage(handler.args, opts)) {
+        return res.json({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: 'Invalid command usage'
+          }
+        } as InteractionResponse);
+      }
     }
 
     const answer = await Promise.resolve(handler.callback({
       options: opts,
       sender: interaction.member.user.id,
-      interactionToken: interaction.token
+      interactionToken: interaction.token,
+      channelId: (interaction as any).channel_id
     }));
 
     return res.json({

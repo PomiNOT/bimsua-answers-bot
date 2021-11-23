@@ -1,10 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import {
   DiscordInteractions,
-  Interaction,
   InteractionType,
   InteractionResponse,
-  InteractionResponseType
+  InteractionResponseType,
+  Interaction,
+  ApplicationCommandInteraction
 } from 'slash-commands';
 
 import commandHandler from './commandHandler';
@@ -44,7 +45,7 @@ app.post('/interactions', verifySig, (req: Request, res: Response) => {
     } as InteractionResponse);
   }
   else if (interaction.type == InteractionType.APPLICATION_COMMAND) {
-    commandHandler.handle(interaction, req, res);
+    commandHandler.handle(interaction as ApplicationCommandInteraction, req, res);
   }
 });
 

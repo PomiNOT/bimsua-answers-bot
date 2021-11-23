@@ -6,7 +6,7 @@ import admin from '../firebaseAdmin';
 import { drawSheet } from '../draw';
 import { promisify } from 'util';
 import stream from 'stream';
-import axios from 'axios';
+import discordInstance from '../discordInstance';
 
 const firestore = firebase.firestore();
 const pipeline = promisify(stream.pipeline);
@@ -47,8 +47,8 @@ export default {
         expires: new Date(Date.now() + 7 * 24 * 3600 * 1000)
       });
     }).then(imageURL => {
-      axios.patch(
-        `https://discord.com/api/v8/webhooks/${process.env.D_APPID}/${interactionToken}/messages/@original`,
+      discordInstance.patch(
+        `/webhooks/${process.env.D_APPID}/${interactionToken}/messages/@original`,
         {
           embeds: [makeEmbed(sheet.data() as AnswerSheet, imageURL[0]).toJSON()]
         }

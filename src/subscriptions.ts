@@ -1,13 +1,6 @@
-import { Choice, SubscriptionErrorType } from "./types";
+import { Choice, SubscriptionErrorType } from './types';
 import firebase from 'firebase';
-import axios from 'axios';
-
-const discordInstance = axios.create({
-  baseURL: 'https://discord.com/api/v8/',
-  headers: {
-    Authorization: `Bot ${process.env.D_TOKEN}`
-  }
-});
+import discordInstance from './discordInstance';
 
 export default class Subscriptions {
   private static groups = new Map<string, Map<string, undefined>>();
